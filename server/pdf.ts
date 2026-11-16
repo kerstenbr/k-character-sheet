@@ -17,6 +17,12 @@ import fontkit from "@pdf-lib/fontkit";
 import { readFileSync } from "node:fs";
 import type { Field } from "../shared/types";
 
+// Read the plain value directly: pdf-lib's getText() rejects rich fields
+// without /V, including empty fields. Never reinterpret the rich /RV as plain text.
+function plainText(field: PDFTextField): string {
+  return field.acroField.getValue()?.decodeText() ?? "";
+}
+
 export function toView(x: number, y: number, w: number, h: number, r: number): [number, number] {
   if (r === 90) return [y, x];
   if (r === 180) return [w - x, y];
@@ -58,6 +64,10 @@ export async function inspectPdf(bytes: Uint8Array) {
       warnings.push(`Campo preservado, sem edição: ${f.getName()}`);
       continue;
     }
+    if (f instanceof PDFTextField && f.isRichFormatted() && !f.acroField.getValue() && f.acroField.dict.has(PDFName.of("RV"))) {
+      warnings.push(`Campo preservado, sem edição (texto formatado sem versão simples): ${f.getName()}`);
+      continue;
+    }
     const widgets = f.acroField.getWidgets();
     widgets.forEach((widget, wi) => {
       const pi = pages.findIndex(
@@ -81,7 +91,7 @@ export async function inspectPdf(bytes: Uint8Array) {
       const option = f instanceof PDFRadioGroup ? f.getOptions()[wi] : undefined;
       const value =
         f instanceof PDFTextField
-          ? f.getText() || ""
+          ? plainText(f)
           : f instanceof PDFCheckBox
             ? f.isChecked()
             : f instanceof PDFRadioGroup
@@ -148,7 +158,7 @@ export async function exportPdf(bytes: Uint8Array, fields: Field[], loadImage?: 
       continue;
     }
     let changed = false;
-    if (f instanceof PDFTextField && (f.getText() || "") !== String(v.value)) {
+    if (f instanceof PDFTextField && plainText(f) !== String(v.value)) {
       f.setText(String(v.value));
       changed = true;
     } else if (f instanceof PDFCheckBox && f.isChecked() !== !!v.value) {
