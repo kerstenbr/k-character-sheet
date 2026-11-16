@@ -301,7 +301,7 @@ export default function App() {
           </button>
           <button className={route.id === "unfiled" ? "nav-item active" : "nav-item"} onClick={() => void navigate({ section: "library", id: "unfiled" })}>
             <Files size={18} />
-            <span>Sem campanha</span>
+            <span>Fichas sem campanha</span>
             <small>{resources.filter((r) => r.kind === "sheet" && !r.deleted && !r.parentId).length}</small>
           </button>
           <button className={route.section === "templates" ? "nav-item active" : "nav-item"} onClick={() => void navigate({ section: "templates" })}>
