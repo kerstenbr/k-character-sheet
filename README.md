@@ -1,12 +1,24 @@
 # K Character Sheet
 
-Uma biblioteca local de fichas de RPG, em português e independente de sistema de regras. Organize personagens por campanha, preencha PDFs, crie quadros de notas e registre suas sessões em um diário.
+Uma biblioteca local de fichas de RPG, em português e independente de sistema de regras. 
+![Tela Inicial](https://i.imgur.com/0Ijck4f.png)
+
+Organize personagens por campanha, preencha PDFs, crie quadros de notas e registre suas sessões em um diário.
+![Tela Inicial](https://i.imgur.com/jsHUVR1.png)
+![Tela Inicial](https://i.imgur.com/50ipMLE.png)
+![Tela Inicial](https://i.imgur.com/R3cQ6ZZ.png)
+![Tela Inicial](https://i.imgur.com/59J1lWu.png)
 
 A ferramenta inclui salvamento automático, modelos reutilizáveis, histórico de versões e backup da biblioteca. Depois da instalação, funciona sem internet.
 
+## Por quê?
+
+Eu fui convidado a participar de uma mesa de RPG do Cyberpunk Edgerunners, e fiquei lutando para conseguir editar minha ficha no firefox e depois do edge.
+Achei mais fácil criar uma ferramenta que edita a ficha e ainda me permite fazer anotações.
+
 ## Como rodar
 
-Você precisa de Git e Docker com Compose instalados.
+Você precisa do Docker com Compose instalado.
 
 ```sh
 git clone https://github.com/kerstenbr/k-character-sheet.git
@@ -17,7 +29,7 @@ docker compose up -d --build
 
 Abra [http://localhost:3000](http://localhost:3000). Para usar outra porta, altere `FRONTEND_PORT` no `.env` antes de iniciar.
 
-A aplicação é pessoal e não tem autenticação.
+A aplicação é de uso pessoal e não tem autenticação.
 
 ## Guia rápido
 
