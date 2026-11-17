@@ -13,7 +13,7 @@ A ferramenta inclui salvamento automático, modelos reutilizáveis, histórico d
 
 ## Por quê?
 
-Eu fui convidado a participar de uma mesa de RPG do Cyberpunk Edgerunners, e fiquei lutando para conseguir editar minha ficha no firefox e depois do edge.
+Eu fui convidado a participar de uma mesa de RPG do Cyberpunk Edgerunners e fiquei lutando para conseguir editar minha ficha no firefox e depois do edge, me perdi no meu bloco de notas e achei muito complicado fazer a gestão do meu personagem daquela maneira.
 Achei mais fácil criar uma ferramenta que edita a ficha e ainda me permite fazer anotações.
 
 ## Como rodar
