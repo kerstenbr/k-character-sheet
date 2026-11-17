@@ -9,7 +9,7 @@ Organize personagens por campanha, preencha PDFs, crie quadros de notas e regist
 ![Tela Inicial](https://i.imgur.com/R3cQ6ZZ.png)
 ![Tela Inicial](https://i.imgur.com/59J1lWu.png)
 
-A ferramenta inclui salvamento automático, modelos reutilizáveis, histórico de versões e backup da biblioteca. Depois da instalação, funciona sem internet.
+A ferramenta inclui salvamento automático, modelos reutilizáveis e histórico de versões. Depois da instalação, funciona sem internet.
 
 ## Por quê?
 
