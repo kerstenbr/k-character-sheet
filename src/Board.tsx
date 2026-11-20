@@ -200,7 +200,6 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
         <button className="secondary" disabled={exporting || busy || !data.items.length} onClick={() => void exportPng()}>
           <Download size={16} /> {exporting ? "Exportando…" : "Exportar PNG"}
         </button>
-        <span role="status">{exporting ? "Preparando imagem do quadro…" : "Exporta todos os itens. Textos respeitam o tamanho das notas."}</span>
       </div>
       {error && <div className="alert">{error}</div>}
       <div
