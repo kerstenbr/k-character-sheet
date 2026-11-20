@@ -22,6 +22,28 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
   useLayoutEffect(() => {
     const element = area.current;
     if (!element) return;
+    const wheel = (event: WheelEvent) => {
+      const target = event.target;
+      // Keep ordinary scrolling inside note editors and floating controls.
+      if (!event.ctrlKey && target instanceof Element && target.closest("textarea, .board-toolbar, .board-selection, .board-zoom")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.deltaY) return;
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element.clientHeight : 1);
+      const nextZoom = Math.max(0.2, Math.min(2.5, zoom * Math.exp(-delta * 0.002)));
+      const rect = element.getBoundingClientRect();
+      const x = event.clientX - rect.left - element.clientLeft;
+      const y = event.clientY - rect.top - element.clientTop;
+      setPan({ x: x - (x - pan.x) * nextZoom / zoom, y: y - (y - pan.y) * nextZoom / zoom });
+      setZoom(nextZoom);
+    };
+    // React's passive wheel listener cannot cancel the browser's Ctrl+wheel zoom.
+    element.addEventListener("wheel", wheel, { passive: false });
+    return () => element.removeEventListener("wheel", wheel);
+  }, [zoom, pan]);
+  useLayoutEffect(() => {
+    const element = area.current;
+    if (!element) return;
     const initialize = () => {
       if (!element.clientWidth || !element.clientHeight) return false;
       const view = fitBoardViewport(initialItems.current, element.clientWidth, element.clientHeight);
@@ -70,6 +92,7 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
     setFrom(null);
   };
   const drag = (e: React.PointerEvent, item: BoardItem, resize = false) => {
+    if (e.button !== 0) return;
     if (tool === "connect") return;
     e.stopPropagation();
     e.preventDefault();
@@ -80,6 +103,10 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
     const start = { x: e.clientX, y: e.clientY };
     let patch: Partial<BoardItem> = {};
     const move = (ev: PointerEvent) => {
+      if (!(ev.buttons & 1)) {
+        end();
+        return;
+      }
       const dx = (ev.clientX - start.x) / zoom,
         dy = (ev.clientY - start.y) / zoom;
       patch = resize ? { w: Math.max(120, Math.min(4000, item.w + dx)), h: Math.max(100, Math.min(4000, item.h + dy)) } : { x: item.x + dx, y: item.y + dy };
@@ -95,13 +122,16 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", end);
       el.removeEventListener("pointercancel", end);
+      el.removeEventListener("lostpointercapture", end);
       if (Object.keys(patch).length) update(item.id, patch);
     };
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", end);
     el.addEventListener("pointercancel", end);
+    el.addEventListener("lostpointercapture", end);
   };
   const panStart = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
     if (e.target !== e.currentTarget && tool !== "pan") return;
     e.preventDefault();
     const el = e.currentTarget as HTMLElement;
@@ -109,13 +139,23 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
     const start = { x: e.clientX, y: e.clientY },
       before = { ...pan };
     if (tool !== "connect") setSelected(null);
-    const move = (ev: PointerEvent) => setPan({ x: before.x + ev.clientX - start.x, y: before.y + ev.clientY - start.y });
+    const move = (ev: PointerEvent) => {
+      if (!(ev.buttons & 1)) {
+        end();
+        return;
+      }
+      setPan({ x: before.x + ev.clientX - start.x, y: before.y + ev.clientY - start.y });
+    };
     const end = () => {
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", end);
+      el.removeEventListener("pointercancel", end);
+      el.removeEventListener("lostpointercapture", end);
     };
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
+    el.addEventListener("lostpointercapture", end);
   };
   const fit = () => {
     if (!area.current) return;
@@ -139,13 +179,23 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
       <div
         className={`board-area ${tool}`}
         ref={area}
-        onPointerDown={panStart}
-        onWheel={(e) => {
-          if (e.ctrlKey) {
+        onMouseDownCapture={(e) => {
+          // Cancel native middle-button autoscroll as well as pointer-based dragging.
+          if (e.button === 1) {
             e.preventDefault();
-            setZoom((z) => Math.max(0.2, Math.min(2.5, z - e.deltaY * 0.002)));
+            e.stopPropagation();
           }
         }}
+        onPointerDownCapture={(e) => {
+          if (e.button === 1) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+        onAuxClick={(e) => {
+          if (e.button === 1) e.preventDefault();
+        }}
+        onPointerDown={panStart}
         style={{ backgroundSize: `${24 * zoom}px ${24 * zoom}px`, backgroundPosition: `${pan.x}px ${pan.y}px` }}>
         {!data.items.length && (
           <div className="board-empty">
@@ -279,7 +329,7 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
           <button className="icon" aria-label="Diminuir zoom do quadro" onClick={() => setZoom((z) => Math.max(0.2, z - 0.1))}>
             <Minus size={16} />
           </button>
-          <span>{Math.round(zoom * 100)}%</span>
+          <span title="Use a roda do mouse para dar zoom no quadro">{Math.round(zoom * 100)}%</span>
           <button className="icon" aria-label="Aumentar zoom do quadro" onClick={() => setZoom((z) => Math.min(2.5, z + 0.1))}>
             <Plus size={16} />
           </button>
