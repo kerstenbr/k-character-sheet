@@ -1,11 +1,12 @@
 import { uuid } from "./id";
 import { useLayoutEffect, useRef, useState } from "react";
-import { StickyNote, ImagePlus, Link2, Hand, MousePointer2, Minus, Plus, Maximize, Trash2, Copy, GripHorizontal } from "lucide-react";
+import { StickyNote, ImagePlus, Link2, Hand, MousePointer2, Minus, Plus, Maximize, Trash2, Copy, GripHorizontal, Download } from "lucide-react";
 import type { Resource, Settings, BoardData, BoardItem } from "../shared/types";
 import { useDocument } from "./useDocument";
 import { SaveBar } from "./components";
 import { upload } from "./api";
 import { fitBoardViewport } from "./boardViewport";
+import { exportBoardPng } from "./boardExport";
 export default function Board({ resource, settings, onSaved }: { resource: Resource; settings: Settings; onSaved: (r: Resource) => void }) {
   const editor = useDocument(resource, settings, onSaved),
     data = editor.doc.data as BoardData;
@@ -15,7 +16,8 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
     [selected, setSelected] = useState<string | null>(null),
     [from, setFrom] = useState<string | null>(null),
     [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [exporting, setExporting] = useState(false);
   const area = useRef<HTMLDivElement>(null),
     file = useRef<HTMLInputElement>(null);
   const initialItems = useRef(data.items);
@@ -172,9 +174,34 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
     setSelected(null);
   };
   const item = data.items.find((i) => i.id === selected);
+  const exportPng = async () => {
+    if (!area.current) return;
+    // Capture the current theme before the asynchronous export starts.
+    const style = getComputedStyle(area.current);
+    const theme = {
+      background: style.backgroundColor,
+      imageBackground: style.getPropertyValue("--panel").trim(),
+      imageLabel: style.getPropertyValue("--muted").trim(),
+    };
+    setExporting(true);
+    setError("");
+    try {
+      await exportBoardPng(data, editor.doc.name, theme);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Não foi possível exportar o quadro.");
+    } finally {
+      setExporting(false);
+    }
+  };
   return (
     <div className="board-shell">
       <SaveBar editor={editor} />
+      <div className="board-export">
+        <button className="secondary" disabled={exporting || busy || !data.items.length} onClick={() => void exportPng()}>
+          <Download size={16} /> {exporting ? "Exportando…" : "Exportar PNG"}
+        </button>
+        <span role="status">{exporting ? "Preparando imagem do quadro…" : "Exporta todos os itens. Textos respeitam o tamanho das notas."}</span>
+      </div>
       {error && <div className="alert">{error}</div>}
       <div
         className={`board-area ${tool}`}

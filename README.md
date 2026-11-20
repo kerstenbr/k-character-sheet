@@ -37,7 +37,7 @@ A aplicação é de uso pessoal e não tem autenticação.
 2. Use **Importar ficha** para adicionar um PDF. O arquivo original permanece intacto.
 3. Em **Preencher**, edite os campos da ficha. Se o PDF não tiver campos, adicione-os em **Configurar campos**.
 4. As alterações são salvas automaticamente por padrão. Use **Baixar PDF** para exportar uma cópia preenchida.
-5. Organize notas e imagens no **Quadro** e registre as sessões no **Diário**.
+5. Organize notas e imagens no **Quadro**, use **Exportar PNG** para compartilhar o quadro inteiro e registre as sessões no **Diário**.
 6. Use **Histórico** para recuperar versões e **Salvar como modelo**, no menu da ficha, para reutilizar seus campos.
 7. Em **Configurações**, use **Exportar biblioteca** e **Restaurar backup** para guardar ou recuperar uma cópia dos seus dados.
 

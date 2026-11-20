@@ -81,6 +81,12 @@ shared/    Tipos compartilhados
 tests/     Testes de integração
 ```
 
+## Exportação do quadro
+
+O botão **Exportar PNG** renderiza notas, imagens e conexões localmente no navegador, incluindo edições ainda não salvas e itens fora da área visível. O arquivo usa o nome do quadro, as cores de fundo do quadro e dos contêineres de imagens do tema atual e margem ao redor do conteúdo; controles e seleção não aparecem. O texto parte do início de cada nota e fica limitado ao espaço dela: amplie notas com rolagem antes de exportar para mostrar mais texto.
+
+A exportação usa Canvas, sem serviços externos ou novas dependências. A escala é de até 2×, reduzida automaticamente para limitar a imagem a 8192 pixels por lado e 16 milhões de pixels no total. Quadros muito extensos podem perder legibilidade nessa redução. Uma falha ao carregar imagens interrompe a exportação e mostra um erro, evitando gerar um arquivo incompleto. PNG foi escolhido por preservar a disposição livre do quadro, sem paginação.
+
 ## Preparação para compartilhar no GitHub
 
 O `.gitignore` exclui `.env`, `data/`, `tmp/`, dependências e builds. PDFs pessoais, backups e dados do volume não fazem parte do código. Compartilhe o código e `.env.example`; cada pessoa cria seu próprio `.env` e seu volume local.
