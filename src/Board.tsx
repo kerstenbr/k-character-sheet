@@ -133,16 +133,18 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
     el.addEventListener("lostpointercapture", end);
   };
   const panStart = (e: React.PointerEvent) => {
-    if (e.button !== 0) return;
-    if (e.target !== e.currentTarget && tool !== "pan") return;
+    const middleButton = e.button === 1;
+    if (e.button !== 0 && !middleButton) return;
+    if (!middleButton && e.target !== e.currentTarget && tool !== "pan") return;
     e.preventDefault();
     const el = e.currentTarget as HTMLElement;
     el.setPointerCapture(e.pointerId);
     const start = { x: e.clientX, y: e.clientY },
       before = { ...pan };
-    if (tool !== "connect") setSelected(null);
+    if (!middleButton && tool !== "connect") setSelected(null);
+    const heldButton = middleButton ? 4 : 1;
     const move = (ev: PointerEvent) => {
-      if (!(ev.buttons & 1)) {
+      if (!(ev.buttons & heldButton)) {
         end();
         return;
       }
@@ -214,8 +216,9 @@ export default function Board({ resource, settings, onSaved }: { resource: Resou
         }}
         onPointerDownCapture={(e) => {
           if (e.button === 1) {
-            e.preventDefault();
             e.stopPropagation();
+            // Capture navigation before an item can start its own drag.
+            panStart(e);
           }
         }}
         onAuxClick={(e) => {
